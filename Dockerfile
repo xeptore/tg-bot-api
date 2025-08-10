@@ -1,9 +1,16 @@
 # syntax=docker/dockerfile:1
 FROM docker.io/library/ubuntu:25.04 AS builder
+USER ubuntu
+WORKDIR /home/ubuntu
+RUN <<EOT
+#!/bin/bash
+set -Eeuo pipefail
 
-RUN apt-get update && \
-  apt-get upgrade -y && \
-  apt-get install -y --no-install-recommends \
+run() { echo "+ $*"; "$@"; }
+
+run apt-get update
+run apt-get upgrade -y
+run apt-get install -y --no-install-recommends \
   ca-certificates \
   clang \
   cmake \
@@ -15,15 +22,6 @@ RUN apt-get update && \
   make \
   wget \
   zlib1g-dev
-
-USER ubuntu
-WORKDIR /home/ubuntu
-RUN <<EOT
-#!/bin/bash
-set -Eeuo pipefail
-
-run() { echo "+ $*"; "$@"; }
-
 run git clone --recursive https://github.com/tdlib/telegram-bot-api.git
 run cd telegram-bot-api
 run rm -rf build
