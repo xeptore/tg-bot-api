@@ -49,6 +49,8 @@ jobs:
           tdlib_version=$(git rev-parse --short HEAD)
           version=$telegram_bot_api_version-$tdlib_version
           echo "version=$version" >> $GITHUB_ENV
+          # debug
+          echo "version=$version"
       - name: Docker Meta
         id: meta
         uses: docker/metadata-action@v5
