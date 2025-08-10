@@ -4,7 +4,7 @@ FROM docker.io/library/ubuntu:25.04 AS builder
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-    wget make git zlib1g-dev libssl-dev gperf cmake clang libc++-dev libc++abi-dev
+    ca-certificates wget make git zlib1g-dev libssl-dev gperf cmake clang libc++-dev libc++abi-dev
 
 USER ubuntu
 WORKDIR /home/ubuntu
