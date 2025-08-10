@@ -4,7 +4,9 @@ FROM docker.io/library/alpine:3 AS builder
 RUN apk update && \
     apk upgrade && \
     apk add \
+    alpine-sdk \
     bash \
+    build-base \
     clang \
     cmake \
     git \
