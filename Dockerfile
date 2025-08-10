@@ -19,7 +19,7 @@ run cd telegram-bot-api
 run rm -rf build
 run mkdir build
 run cd build
-run cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_CXX_FLAGS='-stdlib=libc++' -DCMAKE_EXE_LINKER_FLAGS='-stdlib=libc++' -DCMAKE_SHARED_LINKER_FLAGS=-stdlib=libc++' -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=.. ..
+run cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_CXX_FLAGS='-stdlib=libc++' -DCMAKE_EXE_LINKER_FLAGS='-stdlib=libc++' -DCMAKE_SHARED_LINKER_FLAGS='-stdlib=libc++' -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=.. ..
 run cmake --build . --target install -j "$(nproc)"
 run strip /home/ubuntu/telegram-bot-api/bin/telegram-bot-api
 EOT
