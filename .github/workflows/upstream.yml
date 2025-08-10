@@ -1,0 +1,227 @@
+name: Build & Release Upstream
+on:
+  push:
+    branches:
+      - main
+concurrency:
+  cancel-in-progress: true
+  group: ${{ format('{0}/{1}/{2}', github.workflow, github.ref_type, github.ref_name) }}
+permissions:
+  contents: none
+  deployments: none
+  actions: none
+  checks: none
+  discussions: none
+  id-token: none
+  issues: none
+  packages: none
+  pages: none
+  pull-requests: none
+  repository-projects: none
+  security-events: none
+  statuses: none
+jobs:
+  tag:
+    name: Generate Tag & Release Info
+    permissions:
+      contents: write
+    outputs:
+      no_continue: ${{ steps.generate.outputs.no_continue }}
+      upstream_tag_name: ${{ steps.generate.outputs.upstream_tag_name }}
+      upstream_release_name: ${{ steps.generate.outputs.upstream_release_name }}
+      tag_name: ${{ steps.generate.outputs.tag_name }}
+      release_name: ${{ steps.generate.outputs.release_name }}
+      draft: ${{ steps.generate.outputs.draft }}
+      prerelease: ${{ steps.generate.outputs.prerelease }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Generate
+        id: generate
+        run: |
+          set +e
+          tag="$(cat ./upstream)"
+          upstream_release_json="$(wget -qO- https://api.github.com/repos/SagerNet/sing-box/releases/tags/${tag})"
+          upstream_tag_name="$(jq -r '.tag_name' <<< $upstream_release_json)"
+          upstream_release_name="$(jq -r '.name' <<< $upstream_release_json)"
+          upstream_release_prerelease="$(jq -r '.prerelease' <<< $upstream_release_json)"
+          upstream_release_draft="$(jq -r '.draft' <<< $upstream_release_json)"
+          release_name="$upstream_release_name"
+          tag_name="${upstream_tag_name}-1"
+
+          echo "upstream_tag_name=$upstream_tag_name" >> $GITHUB_OUTPUT
+          echo "upstream_release_name=$upstream_release_name" >> $GITHUB_OUTPUT
+          echo "draft=$upstream_release_draft" >> $GITHUB_OUTPUT
+          echo "prerelease=$upstream_release_prerelease" >> $GITHUB_OUTPUT
+          echo "release_name=$release_name" >> $GITHUB_OUTPUT
+
+          status="$(curl -sfLo self_release_info.json -w '%{http_code}' https://github.com/${{ github.repository }}/releases/download/${tag_name}/info.json)"
+          if [ "$status" == '200' ] || [ "$status" == '302' ]; then
+            self_latest_release_tag_name="$(jq -r '.tag_name' self_release_info.json)"
+            self_latest_release_upstream_tag_name="$(jq -r '.upstream.tag_name' self_release_info.json)"
+
+            if [[ "$upstream_tag_name" == "$self_latest_release_upstream_tag_name" ]]; then
+              if [[ '${{ github.event_name == 'schedule' }}' == 'true' ]]; then
+                echo 'no_continue=1' >> $GITHUB_OUTPUT
+              else
+                pkgrel="$(sed -n 's/^.*-//p' <<< $self_latest_release_tag_name)"
+                pkgrel="$((pkgrel + 1))"
+                tag_name="${upstream_tag_name}-${pkgrel}"
+              fi
+            fi
+          elif [ "$status" != '404' ]; then
+            echo "::error title=Get Self Release Info::Failed to request for self release info."
+            exit 85
+          fi
+
+          echo "tag_name=$tag_name" >> $GITHUB_OUTPUT
+
+          jq \
+            -c \
+            -n \
+            --arg tag_name "$tag_name" \
+            --arg upstream_tag_name "$upstream_tag_name" \
+            --arg upstream_release_name "$upstream_release_name" \
+            '{ tag_name: $tag_name, upstream: { tag_name: $upstream_tag_name, release_name: $upstream_release_name } }' > info.json
+      - name: Create Tag
+        if: steps.generate.outputs.no_continue != '1'
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          fetch_all_tags: true
+          create_annotated_tag: true
+          tag_prefix: ""
+          custom_tag: ${{ steps.generate.outputs.tag_name }}
+      - name: Upload Upstream Info File
+        uses: actions/upload-artifact@v4
+        if: steps.generate.outputs.no_continue != '1'
+        with:
+          name: info.json
+          path: ./info.json
+  build:
+    name: Build
+    if: needs.tag.outputs.no_continue != '1'
+    permissions:
+      contents: read
+    timeout-minutes: 90
+    needs:
+      - tag
+    runs-on: ubuntu-22.04
+    container:
+      image: docker.io/library/golang:1-alpine
+    steps:
+      - name: Install Dependencies
+        run: apk update && apk upgrade && apk add --no-cache jq tar xz clang musl-dev linux-headers
+      - name: Build
+        env:
+          CC: clang
+          CXX: clang++
+        run: |
+          go install \
+              -trimpath \
+              -buildvcs=false \
+              -ldflags "-X 'github.com/sagernet/sing-box/constant.Version=${{ needs.tag.outputs.upstream_tag_name }}' -linkmode external -extldflags=-static -s -compressdwarf=true -w -buildid=''" \
+              -tags 'with_quic with_grpc with_dhcp with_wireguard with_ech with_utls with_reality_server with_acme with_clash_api with_v2ray_api with_gvisor with_embedded_tor with_lwip staticOpenssl staticZlib staticLibevent' \
+              github.com/sagernet/sing-box/cmd/sing-box@${{ needs.tag.outputs.upstream_tag_name }}
+          mv "$(go env GOPATH)/bin/sing-box" ./sing-box
+      - name: Compress Executable
+        run: |
+          set -ex
+          workdir=$(pwd)
+          temp_dir=$(mktemp -d)
+          cd "$temp_dir"
+          wget -qO- https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-amd64_linux.tar.xz | tar -xJvf - upx-4.2.4-amd64_linux/upx
+          mv ./upx-4.2.4-amd64_linux/upx .
+          ./upx --no-color --mono --no-progress --ultra-brute --lzma --no-backup "${workdir}/sing-box"
+          ./upx --test "${workdir}/sing-box"
+          cd -
+          rm -rfv "${temp_dir}"
+      - name: Upload Executable Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sing-box
+          path: ./sing-box
+  release:
+    name: Release
+    if: needs.tag.outputs.no_continue != '1'
+    permissions:
+      contents: write
+    timeout-minutes: 10
+    needs:
+      - tag
+      - build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download Executable Binary Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sing-box
+      - name: Download Upstream Info File Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: info.json
+      - name: Generate Release Body
+        run: |
+          cat >./release_body.md <<EOF
+            # ${{ needs.tag.outputs.upstream_release_name }}
+
+            [Sing-box ${{ needs.tag.outputs.upstream_release_name }} ![upstream release](https://en.wikipedia.org/w/skins/Vector/resources/common/images/link-external-small-ltr-progressive.svg?30a3a)](https://github.com/SagerNet/sing-box/releases/tag/${{ needs.tag.outputs.upstream_tag_name }})
+          EOF
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        continue-on-error: true
+        id: release_try_0
+        with:
+          name: ${{ needs.tag.outputs.release_name }}
+          prerelease: ${{ needs.tag.outputs.prerelease }}
+          draft: ${{ needs.tag.outputs.draft }}
+          body_path: ./release_body.md
+          tag_name: ${{ needs.tag.outputs.tag_name }}
+          files: |
+            ./sing-box
+            ./info.json
+      - name: Release (Retry 1)
+        uses: softprops/action-gh-release@v2
+        continue-on-error: true
+        if: steps.release_try_0.outcome == 'failure'
+        id: release_try_1
+        with:
+          name: ${{ needs.tag.outputs.release_name }}
+          body_path: ./release_body.md
+          prerelease: ${{ needs.tag.outputs.prerelease }}
+          draft: ${{ needs.tag.outputs.draft }}
+          tag_name: ${{ needs.tag.outputs.tag_name }}
+          files: |
+            ./sing-box
+            ./info.json
+      - name: Release (Retry 2)
+        uses: softprops/action-gh-release@v2
+        continue-on-error: true
+        if: steps.release_try_1.outcome == 'failure'
+        id: release_try_2
+        with:
+          name: ${{ needs.tag.outputs.release_name }}
+          body_path: ./release_body.md
+          prerelease: ${{ needs.tag.outputs.prerelease }}
+          draft: ${{ needs.tag.outputs.draft }}
+          tag_name: ${{ needs.tag.outputs.tag_name }}
+          files: |
+            ./sing-box
+            ./info.json
+      - name: Release (Retry 3)
+        uses: softprops/action-gh-release@v2
+        continue-on-error: false
+        if: steps.release_try_2.outcome == 'failure'
+        id: release_try_3
+        with:
+          name: ${{ needs.tag.outputs.release_name }}
+          body_path: ./release_body.md
+          prerelease: ${{ needs.tag.outputs.prerelease }}
+          draft: ${{ needs.tag.outputs.draft }}
+          tag_name: ${{ needs.tag.outputs.tag_name }}
+          files: |
+            ./sing-box
+            ./info.json
