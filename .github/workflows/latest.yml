@@ -29,6 +29,8 @@ jobs:
     permissions:
       packages: write
       contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,9 +50,7 @@ jobs:
           telegram_bot_api_version=$(git rev-parse --short HEAD)
           tdlib_version=$(git rev-parse --short HEAD)
           version=$telegram_bot_api_version-$tdlib_version
-          echo "version=$version" >> $GITHUB_ENV
-          # debug
-          echo "version=$version"
+          echo "version=$version" >> $GITHUB_OUTPUT
       - name: Docker Meta
         id: meta
         uses: docker/metadata-action@v5
