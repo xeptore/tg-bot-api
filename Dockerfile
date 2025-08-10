@@ -1,20 +1,20 @@
 # syntax=docker/dockerfile:1
-FROM docker.io/library/alpine:3 AS builder
+FROM docker.io/library/ubuntu:24.04 AS builder
 
-RUN apk update && \
-    apk upgrade && \
-    apk add \
-    alpine-sdk \
-    bash \
-    build-base \
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y \
+    clang \
     cmake \
-    git \
     gperf \
-    linux-headers \
-    openssl-dev \
-    zlib-dev
+    git \
+    libc++-dev \
+    libc++abi-dev \
+    libssl-dev \
+    make \
+    zlib1g-dev
 
-RUN adduser -D -u 1000 -g 1000 -h /home/nonroot nonroot
+RUN useradd -m -u 1000 -g 1000 -h /home/nonroot nonroot
 USER nonroot
 WORKDIR /home/nonroot
 RUN <<EOT
@@ -28,18 +28,26 @@ run cd telegram-bot-api
 run rm -rf build
 run mkdir build
 run cd build
-run cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=.. ..
+run CXXFLAGS=-stdlib=libc++ CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=.. ..
 run cmake --build . --target install -j "$(nproc)"
 run strip /home/nonroot/telegram-bot-api/bin/telegram-bot-api
 EOT
 
-FROM docker.io/library/alpine:3
+FROM docker.io/library/ubuntu:24.04
 
-RUN apk update && \
-    apk upgrade && \
-    apk add --no-cache --update \
+RUN <<EOT
+#!/bin/bash
+set -Eeuo pipefail
+
+apt-get update
+apt-get upgrade -y
+apt-get install -y \
     libstdc++ \
-    openssl
+    openssl \
+    libatomic1
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+EOT
 
 COPY --from=builder \
     /home/nonroot/telegram-bot-api/bin/telegram-bot-api \
