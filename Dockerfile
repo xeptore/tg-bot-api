@@ -4,7 +4,7 @@ FROM docker.io/library/ubuntu:25.04 AS builder
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-    make git zlib1g-dev libssl-dev gperf cmake clang libc++-dev libc++abi-dev
+    wget make git zlib1g-dev libssl-dev gperf cmake clang libc++-dev libc++abi-dev
 
 RUN useradd -m -u 1000 -g 1000 -h /home/nonroot nonroot
 USER nonroot
@@ -31,7 +31,7 @@ RUN <<EOT
 #!/bin/bash
 set -Eeuo pipefail
 
-source <(wget -qO- https://gist.xeptore.dev/run-nobail.sh)
+source <(python3 -c "import urllib.request; print(urllib.request.urlopen('https://gist.xeptore.dev/run-nobail.sh').read().decode())")
 
 run apt-get update
 run apt-get upgrade -y
