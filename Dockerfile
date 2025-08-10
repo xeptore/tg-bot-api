@@ -54,7 +54,8 @@ run apt-get update
 run apt-get upgrade -y
 run apt-get install -y --no-install-recommends \
   ca-certificates \
-  libc++ \
+  libc++1 \
+  libc++abi1 \
   openssl
 run apt-get clean
 run rm -rf /var/lib/apt/lists/*
