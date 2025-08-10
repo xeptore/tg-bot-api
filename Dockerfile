@@ -4,7 +4,7 @@ FROM docker.io/library/ubuntu:25.04 AS builder
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-    make git zlib1g-dev libssl-dev gperf cmake clang libc++-dev libc++abi-dev lld
+    make git zlib1g-dev libssl-dev gperf cmake clang libc++-dev libc++abi-dev
 
 RUN useradd -m -u 1000 -g 1000 -h /home/nonroot nonroot
 USER nonroot
@@ -20,7 +20,7 @@ run cd telegram-bot-api
 run rm -rf build
 run mkdir build
 run cd build
-run CXXFLAGS=-stdlib=libc++ CC=/usr/bin/clang CXX=/usr/bin/clang++ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=.. ..
+run CXXFLAGS="-stdlib=libc++" CC=/usr/bin/clang-18 CXX=/usr/bin/clang++-18 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=.. ..
 run cmake --build . --target install -j "$(nproc)"
 run strip /home/nonroot/telegram-bot-api/bin/telegram-bot-api
 EOT
