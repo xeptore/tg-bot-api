@@ -19,7 +19,7 @@ RUN <<EOT
 #!/bin/bash
 set -Eeuo pipefail
 
-run() { echo "+ $*"; "$@"; }
+source <(curl -fsSL https://gist.xeptore.dev/run-nobail.sh)
 
 run git clone --recursive https://github.com/tdlib/telegram-bot-api.git
 run cd telegram-bot-api
