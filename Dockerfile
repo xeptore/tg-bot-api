@@ -9,8 +9,13 @@ RUN apk update && \
     cmake \
     git \
     gperf \
+    libc++ \
+    libc++-dev \
     libc-dev \
     linux-headers \
+    lld \
+    llvm \
+    llvm-dev \
     make \
     openssl-dev \
     zlib-dev
@@ -29,7 +34,7 @@ run cd telegram-bot-api
 run rm -rf build
 run mkdir build
 run cd build
-run cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=.. ..
+run cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_LINKER=lld -DCMAKE_AR=llvm-ar -DCMAKE_RANLIB=llvm-ranlib -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=.. ..
 run cmake --build . --target install -j "$(nproc)"
 run strip /home/nonroot/telegram-bot-api/bin/telegram-bot-api
 EOT
