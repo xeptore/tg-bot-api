@@ -32,22 +32,23 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - name: Checkout
+      - name: Checkout This Repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Checkout Upstream
+      - name: Checkout Upstream Repo
         uses: actions/checkout@v4
         with:
-          repository: tdlib/td
+          repository: tdlib/telegram-bot-api
           path: upstream
           submodules: recursive
           fetch-depth: 0
       - name: Get Version
+        working-directory: upstream
         id: version
         run: |
-          telegram_bot_api_version="$(cd upstream && git rev-parse --short HEAD)"
-          tdlib_version="$(cd upstream/td && git rev-parse --short HEAD)"
+          telegram_bot_api_version="$(git rev-parse --short HEAD)"
+          tdlib_version="$(cd td && git rev-parse --short HEAD)"
           version="${telegram_bot_api_version}-${tdlib_version}"
           echo "version=${version}" >> $GITHUB_OUTPUT
       - name: Docker Meta
@@ -86,9 +87,9 @@ jobs:
         with:
           push: true
           pull: true
+          no-cache: true
           context: .
           file: Dockerfile
-          no-cache: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
