@@ -44,13 +44,12 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       - name: Get Version
-        working-directory: upstream
         id: version
         run: |
-          telegram_bot_api_version=$(git rev-parse --short HEAD)
-          tdlib_version=$(cd td &&git rev-parse --short HEAD)
-          version=$telegram_bot_api_version-$tdlib_version
-          echo "version=$version" >> $GITHUB_OUTPUT
+          telegram_bot_api_version="$(cd upstream && git rev-parse --short HEAD)"
+          tdlib_version="$(cd upstream/td && git rev-parse --short HEAD)"
+          version="${telegram_bot_api_version}-${tdlib_version}"
+          echo "version=${version}" >> $GITHUB_OUTPUT
       - name: Docker Meta
         id: meta
         uses: docker/metadata-action@v5
