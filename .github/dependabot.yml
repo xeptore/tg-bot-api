@@ -4,5 +4,20 @@ updates:
     directory: /
     schedule:
       interval: daily
-    reviewers:
-      - z4x7k
+    open-pull-requests-limit: 20
+    labels:
+      - dependabot
+      - dependencies
+      - github-actions
+      - build
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 20
+    labels:
+      - dependabot
+      - dependencies
+      - docker
+      - image
+      - build
