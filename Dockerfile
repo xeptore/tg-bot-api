@@ -6,6 +6,7 @@ RUN apk update && \
     apk add \
     alpine-sdk \
     bash \
+    binutils \
     build-base \
     clang \
     cmake \
@@ -13,12 +14,15 @@ RUN apk update && \
     gperf \
     libc++ \
     libc++-dev \
+    libc++abi \
+    libc++abi-dev \
     libc-dev \
     linux-headers \
     lld \
     llvm \
     llvm-dev \
     make \
+    musl-dev \
     openssl-dev \
     zlib-dev
 
@@ -36,8 +40,8 @@ run cd telegram-bot-api
 run rm -rf build
 run mkdir build
 run cd build
-run cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_LINKER=lld -DCMAKE_AR=llvm-ar -DCMAKE_RANLIB=llvm-ranlib -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=.. ..
-run cmake --build . --target install -j "$(nproc)"
+run cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS='-stdlib=libc++' -DCMAKE_EXE_LINKER_FLAGS='-lc++ -lc++abi' -DCMAKE_LINKER=lld -DCMAKE_AR=llvm-ar -DCMAKE_RANLIB=llvm-ranlib -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=.. ..
+run cmake --build . --target install -j "$(nproc)" -v
 run strip /home/nonroot/telegram-bot-api/bin/telegram-bot-api
 EOT
 
