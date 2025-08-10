@@ -1,7 +1,9 @@
 # syntax=docker/dockerfile:1
 FROM docker.io/library/alpine:3 AS builder
 
-RUN apk --no-cache add \
+RUN apk update && \
+    apk upgrade && \
+    apk add \
     alpine-sdk \
     bash \
     build-base \
@@ -33,7 +35,9 @@ EOT
 
 FROM docker.io/library/alpine:3
 
-RUN apk --no-cache --update add \
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache --update \
     libstdc++ \
     openssl
 
