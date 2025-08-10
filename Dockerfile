@@ -4,15 +4,7 @@ FROM docker.io/library/ubuntu:24.04 AS builder
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y \
-    clang \
-    cmake \
-    gperf \
-    git \
-    libc++-dev \
-    libc++abi-dev \
-    libssl-dev \
-    make \
-    zlib1g-dev
+    make git zlib1g-dev libssl-dev gperf cmake clang libc++-dev libc++abi-dev
 
 RUN useradd -m -u 1000 -g 1000 -h /home/nonroot nonroot
 USER nonroot
