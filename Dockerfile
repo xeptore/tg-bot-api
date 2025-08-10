@@ -12,7 +12,7 @@ RUN <<EOT
 #!/bin/bash
 set -Eeuo pipefail
 
-source <(wget -qO- https://gist.xeptore.dev/run-nobail.sh)
+run() { echo "+ $*"; "$@"; }
 
 run git clone --recursive https://github.com/tdlib/telegram-bot-api.git
 run cd telegram-bot-api
@@ -26,10 +26,17 @@ EOT
 
 FROM docker.io/library/ubuntu:25.04
 
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN <<EOT
+#!/bin/bash
+set -Eeuo pipefail
+
+run() { echo "+ $*"; "$@"; }
+
+run apt-get update
+run apt-get upgrade -y
+run apt-get clean
+run rm -rf /var/lib/apt/lists/*
+EOT
 
 COPY --from=builder \
     /home/ubuntu/telegram-bot-api/bin/telegram-bot-api \
