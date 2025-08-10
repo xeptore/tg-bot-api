@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM docker.io/library/ubuntu:24.04 AS builder
+FROM docker.io/library/ubuntu:25.04 AS builder
 
 RUN apt-get update && \
     apt-get upgrade -y && \
@@ -25,7 +25,7 @@ run cmake --build . --target install -j "$(nproc)"
 run strip /home/nonroot/telegram-bot-api/bin/telegram-bot-api
 EOT
 
-FROM docker.io/library/ubuntu:24.04
+FROM docker.io/library/ubuntu:25.04
 
 RUN <<EOT
 #!/bin/bash
