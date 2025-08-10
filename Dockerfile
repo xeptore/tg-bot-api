@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM docker.io/library/alpine:3 as builder
 
 RUN apk --no-cache add \
