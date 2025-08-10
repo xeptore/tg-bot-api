@@ -3,8 +3,8 @@ FROM docker.io/library/ubuntu:24.04 AS builder
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y \
-    make git zlib1g-dev libssl-dev gperf cmake clang libc++-dev libc++abi-dev
+    apt-get install -y --no-install-recommends \
+    make git zlib1g-dev libssl-dev gperf cmake clang libc++-dev libc++abi-dev lld
 
 RUN useradd -m -u 1000 -g 1000 -h /home/nonroot nonroot
 USER nonroot
