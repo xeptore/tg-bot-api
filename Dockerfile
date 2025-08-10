@@ -31,14 +31,12 @@ RUN <<EOT
 #!/bin/bash
 set -Eeuo pipefail
 
-apt-get update
-apt-get upgrade -y
-apt-get install -y \
-    libstdc++ \
-    openssl \
-    libatomic1
-apt-get clean
-rm -rf /var/lib/apt/lists/*
+source <(wget -qO- https://gist.xeptore.dev/run-nobail.sh)
+
+run apt-get update
+run apt-get upgrade -y
+run apt-get clean
+run rm -rf /var/lib/apt/lists/*
 EOT
 
 COPY --from=builder \
