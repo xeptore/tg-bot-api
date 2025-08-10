@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM docker.io/library/alpine:3 as builder
+FROM docker.io/library/alpine:3 AS builder
 
 RUN apk --no-cache add \
     alpine-sdk \
@@ -16,7 +16,7 @@ RUN adduser -D -u 1000 -g 1000 -h /home/nonroot nonroot
 USER nonroot
 WORKDIR /home/nonroot
 RUN <<EOT
-#!/usr/bin/bash
+#!/bin/bash
 set -Eeuo pipefail
 
 git clone --recursive https://github.com/tdlib/telegram-bot-api.git
