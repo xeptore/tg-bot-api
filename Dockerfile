@@ -27,17 +27,10 @@ EOT
 
 FROM docker.io/library/ubuntu:25.04
 
-RUN <<EOT
-#!/bin/bash
-set -Eeuo pipefail
-
-source <(python3 -c "import urllib.request; print(urllib.request.urlopen('https://gist.xeptore.dev/run-nobail.sh').read().decode())")
-
-run apt-get update
-run apt-get upgrade -y
-run apt-get clean
-run rm -rf /var/lib/apt/lists/*
-EOT
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder \
     /home/nonroot/telegram-bot-api/bin/telegram-bot-api \
