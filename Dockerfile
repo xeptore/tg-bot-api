@@ -17,7 +17,7 @@ USER nonroot
 WORKDIR /home/nonroot
 RUN <<EOT
 #!/bin/bash
-set -Eeuo pipefail
+set -Eexvuo pipefail
 
 git clone --recursive https://github.com/tdlib/telegram-bot-api.git
 cd telegram-bot-api
