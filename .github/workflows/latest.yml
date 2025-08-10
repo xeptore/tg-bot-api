@@ -37,16 +37,18 @@ jobs:
       - name: Checkout Upstream
         uses: actions/checkout@v4
         with:
-            repository: tdlib/td
-            path: upstream
-            submodules: recursive
+          repository: tdlib/td
+          path: upstream
+          submodules: recursive
+          fetch-depth: 0
       - name: Get Version
+        working-directory: upstream
         id: version
         run: |
-            telegram_bot_api_version=$(cd telegram-bot-api && git rev-parse --short HEAD)
-            tdlib_version=$(cd upstream/td && git rev-parse --short HEAD)
-            version=$telegram_bot_api_version-$tdlib_version
-            echo "version=$version" >> $GITHUB_ENV
+          telegram_bot_api_version=$(git rev-parse --short HEAD)
+          tdlib_version=$(git rev-parse --short HEAD)
+          version=$telegram_bot_api_version-$tdlib_version
+          echo "version=$version" >> $GITHUB_ENV
       - name: Docker Meta
         id: meta
         uses: docker/metadata-action@v5
