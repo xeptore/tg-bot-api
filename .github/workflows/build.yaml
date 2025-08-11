@@ -89,7 +89,6 @@ jobs:
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
-            type=edge,branch=${{ github.event.repository.default_branch }}
             type=raw,value=${{ steps.version.outputs.telegram_bot_api_rev }}
             type=raw,value=${{ needs.version.outputs.version }}
           labels: |
