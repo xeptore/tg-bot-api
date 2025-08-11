@@ -62,9 +62,6 @@ run "./${upx}" \
   --no-progress \
   --ultra-brute \
   --lzma \
-  --best \
-  --all-methods \
-  --all-filters \
   --no-backup \
   "${workdir}/telegram-bot-api"
 run cd -
