@@ -31,17 +31,17 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
+      - name: Install Dependencies
+        run: |
+          apt-get update
+          apt-get upgrade -y
+          apt-get install -y make git zlib1g-dev libssl-dev gperf cmake g++
       - name: Checkout Upstream Repo
         uses: actions/checkout@v4
         with:
           repository: tdlib/telegram-bot-api
           submodules: recursive
           fetch-depth: 0
-      - name: Install Dependencies
-        run: |
-          apt-get update
-          apt-get upgrade -y
-          apt-get install -y make git zlib1g-dev libssl-dev gperf cmake g++
       - name: Inject Version CMake Command
         run: |
           echo 'file(WRITE version.txt "${PROJECT_VERSION}")' >> CMakeLists.txt
