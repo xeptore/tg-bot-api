@@ -80,6 +80,6 @@ HEALTHCHECK \
   --interval=5s \
   --timeout=30s \
   --retries=3 \
-  CMD nc -z localhost 8081 || exit 1
+  CMD exec 3<>/dev/tcp/127.0.0.1/8081
 
 ENTRYPOINT ["/usr/local/bin/telegram-bot-api"]
