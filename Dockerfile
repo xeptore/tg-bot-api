@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM docker.io/library/ubuntu:25.04 AS builder
+FROM docker.io/library/ubuntu:25.10 AS builder
 RUN <<EOT
 #!/bin/bash
 set -Eeuo pipefail
@@ -47,7 +47,7 @@ run cmake --build . --target install -j "$(nproc)"
 run strip /home/ubuntu/telegram-bot-api/bin/telegram-bot-api
 EOT
 
-FROM docker.io/library/ubuntu:25.04
+FROM docker.io/library/ubuntu:25.10
 
 RUN <<EOT
 #!/bin/bash
