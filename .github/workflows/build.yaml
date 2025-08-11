@@ -33,7 +33,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: tdlib/telegram-bot-api
-          path: upstream
           submodules: recursive
           fetch-depth: 0
       - name: Install Dependencies
