@@ -38,9 +38,9 @@ jobs:
           fetch-depth: 0
       - name: Install Dependencies
         run: |
-          apt-get update
-          apt-get upgrade -y
-          apt-get install -y make git zlib1g-dev libssl-dev gperf cmake g++
+          sudo apt-get update
+          sudo apt-get upgrade -y
+          sudo apt-get install -y make git zlib1g-dev libssl-dev gperf cmake g++
       - name: Inject Version CMake Command
         working-directory: telegram-bot-api
         run: |
