@@ -19,6 +19,7 @@ run apt-get install -y --no-install-recommends \
   libssl-dev \
   make \
   wget \
+  xz-utils \
   zlib1g-dev
 EOT
 USER ubuntu
