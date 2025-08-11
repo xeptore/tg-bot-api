@@ -29,6 +29,7 @@ set -Eeuo pipefail
 
 run() { echo "+ $*"; "$@"; }
 
+# Build Telegram Bot API
 run git clone --recursive https://github.com/tdlib/telegram-bot-api.git
 run cd telegram-bot-api
 run rm -rf build
@@ -45,6 +46,18 @@ run cmake .. \
   ..
 run cmake --build . --target install -j "$(nproc)"
 run strip /home/ubuntu/telegram-bot-api/bin/telegram-bot-api
+
+# Compress Executable
+upx_version=5.0.2
+run workdir="$(pwd)"
+run temp_dir="$(mktemp -d)"
+run cd "$temp_dir"
+run wget -qO- "https://github.com/upx/upx/releases/download/v${upx_version}/upx-${upx_version}-amd64_linux.tar.xz" | tar -xJvf - "upx-${upx_version}-amd64_linux/upx"
+run mv "./upx-${upx_version}-amd64_linux/upx" .
+run ./upx --no-color --mono --no-progress --ultra-brute --lzma --best --all-methods --all-filters --no-backup "${workdir}/telegram-bot-api"
+run ./upx --test "${workdir}/telegram-bot-api"
+run cd -
+run rm -rfv "${temp_dir}"
 EOT
 
 FROM docker.io/library/ubuntu:25.04
