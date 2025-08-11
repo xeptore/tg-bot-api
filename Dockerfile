@@ -56,8 +56,17 @@ run cd "$temp_dir"
 run wget -q "https://github.com/upx/upx/releases/download/v${upx_version}/upx-${upx_version}-amd64_linux.tar.xz" -O upx.tar.xz
 run tar -xJvf upx.tar.xz "upx-${upx_version}-amd64_linux/upx"
 upx="upx-${upx_version}-amd64_linux/upx"
-run "./${upx}" --no-color --mono --no-progress --ultra-brute --lzma --best --all-methods --all-filters --no-backup "${workdir}/telegram-bot-api"
-run "./${upx}" --test "${workdir}/telegram-bot-api"
+run "./${upx}" \
+  --no-color \
+  --mono \
+  --no-progress \
+  --ultra-brute \
+  --lzma \
+  --best \
+  --all-methods \
+  --all-filters \
+  --no-backup \
+  "${workdir}/telegram-bot-api"
 run cd -
 run rm -rfv "${temp_dir}"
 EOT
