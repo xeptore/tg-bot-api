@@ -1,0 +1,39 @@
+name: tg-bot-api
+services:
+  server:
+    image: ghcr.io/xeptore/tg-bot-api:latest
+    pull_policy: always
+    restart: unless-stopped
+    init: true
+    user: ubuntu
+    stop_signal: SIGINT
+    stop_grace_period: 1m
+    environment:
+      TELEGRAM_API_ID: ""
+      TELEGRAM_API_HASH: ""
+    command:
+      - --dir=/var/lib/telegram-bot-api
+      - --verbosity=2 # 0 to disable
+    volumes:
+      # Make sure to generate the ./data directory with proper permissions.
+      # In the rooted Docker Daemon setup, must be owned by (1000:1000).
+      - type: bind
+        source: ./data
+        target: /var/lib/telegram-bot-api
+        read_only: false
+        bind:
+          create_host_path: false
+    ports:
+      - name: api
+        target: 8081
+        host_ip: 127.0.0.1
+        published: 8081
+        protocol: tcp
+        mode: host
+      # Uncomment to expose stats port
+      # - name: stats
+      #   target: 8082
+      #   host_ip: 127.0.0.1
+      #   published: 8082
+      #   protocol: tcp
+      #   mode: host
