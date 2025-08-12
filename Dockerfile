@@ -50,20 +50,22 @@ run strip /home/ubuntu/telegram-bot-api/bin/telegram-bot-api
 
 # Compress Executable
 upx_version=5.0.2
-workdir="$(pwd)"
 temp_dir="$(mktemp -d)"
 run cd "$temp_dir"
 run wget -q "https://github.com/upx/upx/releases/download/v${upx_version}/upx-${upx_version}-amd64_linux.tar.xz" -O upx.tar.xz
 run tar -xJvf upx.tar.xz "upx-${upx_version}-amd64_linux/upx"
-upx="upx-${upx_version}-amd64_linux/upx"
+upx="${temp_dir}/upx-${upx_version}-amd64_linux/upx"
 run "./${upx}" \
-  --no-color \
+  --all-filters \
+  --all-methods \
+  --best \
+  --lzma \
   --mono \
+  --no-backup \
+  --no-color \
   --no-progress \
   --ultra-brute \
-  --lzma \
-  --no-backup \
-  "${workdir}/telegram-bot-api"
+  /home/ubuntu/telegram-bot-api/bin/telegram-bot-api
 run cd -
 run rm -rfv "${temp_dir}"
 EOT
