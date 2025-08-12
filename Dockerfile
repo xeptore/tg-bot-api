@@ -55,7 +55,7 @@ run cd "$temp_dir"
 run wget -q "https://github.com/upx/upx/releases/download/v${upx_version}/upx-${upx_version}-amd64_linux.tar.xz" -O upx.tar.xz
 run tar -xJvf upx.tar.xz "upx-${upx_version}-amd64_linux/upx"
 upx="${temp_dir}/upx-${upx_version}-amd64_linux/upx"
-run "./${upx}" \
+run "${upx}" \
   --all-filters \
   --all-methods \
   --best \
