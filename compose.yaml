@@ -29,6 +29,7 @@ services:
         host_ip: 127.0.0.1
         published: 8081
         protocol: tcp
+        app_protocol: http
         mode: host
       # Uncomment to expose stats port
       # - name: stats
@@ -36,4 +37,5 @@ services:
       #   host_ip: 127.0.0.1
       #   published: 8082
       #   protocol: tcp
+      #   app_protocol: http
       #   mode: host
