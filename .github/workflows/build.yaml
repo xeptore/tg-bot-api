@@ -37,7 +37,7 @@ jobs:
           apt-get upgrade -y
           apt-get install -y make git zlib1g-dev libssl-dev gperf cmake g++
       - name: Checkout Upstream Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: tdlib/telegram-bot-api
           submodules: recursive
@@ -66,11 +66,11 @@ jobs:
       contents: read
     steps:
       - name: Checkout This Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Checkout Upstream Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: tdlib/telegram-bot-api
           path: upstream
