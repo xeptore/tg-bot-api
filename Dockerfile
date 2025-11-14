@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM docker.io/library/ubuntu:25.10 AS builder
+FROM docker.io/library/ubuntu:26.04 AS builder
 RUN <<EOT
 #!/bin/bash
 set -Eeuo pipefail
@@ -70,7 +70,7 @@ run cd -
 run rm -rfv "${temp_dir}"
 EOT
 
-FROM docker.io/library/ubuntu:25.10
+FROM docker.io/library/ubuntu:26.04
 
 RUN <<EOT
 #!/bin/bash
