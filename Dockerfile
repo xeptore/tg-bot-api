@@ -49,7 +49,7 @@ run cmake --build . --target install -j "$(nproc)"
 run strip /home/ubuntu/telegram-bot-api/bin/telegram-bot-api
 
 # Compress Executable
-upx_version=5.0.2
+upx_version=5.2.1
 temp_dir="$(mktemp -d)"
 run cd "$temp_dir"
 run wget -q "https://github.com/upx/upx/releases/download/v${upx_version}/upx-${upx_version}-amd64_linux.tar.xz" -O upx.tar.xz
